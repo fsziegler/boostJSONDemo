@@ -1,0 +1,32 @@
+{
+   "object1":{
+      "obj1string1":"obj1value1",
+      "obj1string2":12,
+      "obj1string3":12.345,
+      "obj1string4":true,
+      "obj1string5":false,
+      "obj1string6":null
+   },
+   "object2":{
+      "obj2string1":"obj2value1",
+      "obj2string2":12,
+      "obj2string3":{
+         "obj2str3string1":"obj2str3value1",
+         "obj2str3string2":12
+      }
+   },
+   "object3":{
+      "obj3string1":"obj3str1value1",
+      "obj3string2":12,
+      "obj3array1":[
+         "obj3arr1string1",
+         "obj3arr1string2",
+         "obj3arr1string3",
+         1,
+         1.23,
+         true,
+         false,
+         null
+      ]
+   }
+}
