@@ -30,3 +30,7 @@
 # Eclipse workspace files
 workspace/.metadata
 
+# Backup files
+*~
+*.*~
+
