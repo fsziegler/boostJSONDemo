@@ -42,6 +42,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.701144832" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.libs.133322670" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="boost_program_options"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="boost_regex"/>
 								</option>
 								<option id="gnu.cpp.link.option.flags.1326126547" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="-std=c++11" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.693134537" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -102,6 +103,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1582312173" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
 								<option id="gnu.cpp.link.option.libs.493619297" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="boost_program_options"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="boost_regex"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.707316177" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -151,4 +153,5 @@
 			<resource resourceType="PROJECT" workspacePath="/bjd001"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

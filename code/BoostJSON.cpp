@@ -29,6 +29,7 @@ SOFTWARE.
  */
 
 #include "BoostJSON.h"
+#include <boost/regex.hpp>
 
 namespace BoostJSONDemo
 {
@@ -56,13 +57,58 @@ void Indent(int cnt)
    }
 }
 
+void BoostJSON::CoutCode(ptree::const_iterator itr, string& outStr) const
+{
+   outStr.clear();
+   outStr.append(0 < itr->first.size() ? "[S" : "[E");
+   outStr.append(0 < itr->second.data().size() ? "S" : "E");
+   outStr.append(0 < itr->second.size() ? "S] " : "E] ");
+}
+
+void BoostJSON::CoutTypeStr(ptree::const_iterator itr) const
+{
+   ptree::const_iterator itrCpy(itr);
+   switch(GetObjectType(itrCpy))
+   {
+   case kObject:
+      cout << "{object} ";
+      break;
+   case kArrayObj:
+      cout << "{array object} ";
+      break;
+   case kValue:
+      cout << "{";
+      cout << GetValueTypeStr(GetValueType(itrCpy));
+      cout << "} ";
+      break;
+   case kStrValuePair:
+      cout << "{string-value pair} ";
+      break;
+   case kUNKNOWNObjType:
+   default:
+      cout << "{unknown} ";
+      break;
+   }
+}
+
 void BoostJSON::Dump(const ptree& pt, int cnt) const
 {
-   static const string EmptyStr("empty");
+   static const string EmptyStr("[empty]");
+   string outStr;
    for (ptree::const_iterator itr = pt.begin(); pt.end() != itr; ++itr)
    {
+      CoutCode(itr, outStr);
       Indent(cnt);
-      cout << ((0 < itr->first.size()) ? itr->first : EmptyStr);
+      if(0 < itr->first.size())
+      {
+         cout << outStr << itr->first;
+         CoutTypeStr(itr);
+      }
+      else
+      {
+         cout << outStr << EmptyStr;
+      }
+      cout << " : ";
       if(0 < GetChildCount(itr))
       {
          cout << endl;
@@ -70,16 +116,17 @@ void BoostJSON::Dump(const ptree& pt, int cnt) const
       }
       else
       {
-         cout << " : "
-               << (0 < itr->second.data().size() ? itr->second.data() : EmptyStr)
-               << endl;
+         cout
+               << (0 < itr->second.data().size() ? itr->second.data() : EmptyStr);
+         ptree::const_iterator itrCpy(itr);
+         CoutTypeStr(itrCpy);
+         cout << endl;
       }
    }
 }
 
 void BoostJSON::Dump() const
 {
-   int cnt(0);
    Dump(m_pt, 0);
 }
 
@@ -90,40 +137,160 @@ const ptree& BoostJSON::getPt() const
 
 bool BoostJSON::IsObject(ptree::const_iterator& itr) const
 {
-   return( 0 < GetChildCount(itr));
+   return (kJSONObjectType == GetValueType(itr));
 }
 
 bool BoostJSON::IsArray(ptree::const_iterator& itr) const
 {
+   return (kJSONArrayType == GetValueType(itr));
 }
 
 bool BoostJSON::IsString(ptree::const_iterator& itr) const
 {
+   return (kJSONStringType == GetValueType(itr));
 }
 
 bool BoostJSON::IsValue(ptree::const_iterator& itr) const
 {
+   return (kValue == GetObjectType(itr));
 }
 
-TValueType BoostJSON::GetValueType(ptree::const_iterator& itr) const
+/*
+            Second
+   First    data()   Children Case
+   -------+--------+--------+-------
+   empty  | empty  | empty  | DNE
+   empty  | empty  | exist  | DNE
+*   empty  | string | empty  | value (in array)
+   empty  | string | exist  | DNE
+*   string | empty  | empty  | object (empty)
+*   string | empty  | exist  | object
+   string | string | empty  | string:value pair
+   string | string | exist  | DNE
+*/
+TObjType BoostJSON::GetObjectType(ptree::const_iterator &itr) const
 {
-   if(IsObject(itr))
+   bool first(0 < itr->first.size());
+   bool twoData(0 < itr->second.data().size());
+   bool children(0 < itr->second.size());
+   if(!first && twoData && !children)
    {
-     return kObject;
+      return kValue;
    }
-   //   kString,
-//   kNumber,
-//   ,
-//   kArray,
-//   kTrue,
-//   kFalse,
-//   kNull,
-//   kUNKNOWNValueType,
+   if (first && !twoData)
+   {
+      if(0 < itr->second.size())
+      {
+         ptree::const_iterator objItr(itr->second.begin());
+         switch(GetObjectType(objItr))
+         {
+         case kObject:
+         case kStrValuePair:
+            return kObject;
+         case kValue:
+            return kArrayObj;
+         default:
+            break;
+         }
+      }
+      return kUNKNOWNObjType;
+   }
+   if(first && twoData && !children)
+   {
+     return kStrValuePair;
+   }
+   return kUNKNOWNObjType;
+}
+
+const boost::regex kTrueTypeRegexStr("true");
+const boost::regex kFalseTypeRegexStr("false");
+const boost::regex kNullTypeRegexStr("null");
+const boost::regex kNumberTypeRegexStr("[0-9\\+\\-\\.eE]+");
+// see http://www.regular-expressions.info/posixbrackets.html
+const boost::regex kStringTypeRegexStr(
+      "[[:alnum:][:punct:][:space:]]+");
+
+TJSONValueType BoostJSON::GetValueType(const string& valStr) const
+{
+   if(boost::regex_match(valStr, kTrueTypeRegexStr))
+   {
+      return kJSONTrueType;
+   }
+   if(boost::regex_match(valStr, kFalseTypeRegexStr))
+   {
+      return kJSONFalseType;
+   }
+   if(boost::regex_match(valStr, kNullTypeRegexStr))
+   {
+      return kJSONNullType;
+   }
+   if(boost::regex_match(valStr, kNumberTypeRegexStr))
+   {
+      return kJSONNumberType;
+   }
+   if(boost::regex_match(valStr, kStringTypeRegexStr))
+   {
+      return kJSONStringType;
+   }
+   return kUNKNOWNJSONValueType;
+}
+
+TJSONValueType BoostJSON::GetValueType(ptree::const_iterator& itr) const
+{
+   TObjType objType(GetObjectType(itr));
+   switch(objType)
+   {
+   case kObject:
+      return kJSONObjectType;
+   case kArrayObj:
+      return kJSONArrayType;
+   case kValue:
+   {
+      return GetValueType(itr->second.data());
+   }
+   case kStrValuePair:
+      return kJSONStringType; // assumes "string" in "string/value" pair
+   default:
+      break;
+   }
+   return kUNKNOWNJSONValueType;
+}
+
+const string& BoostJSON::GetValueTypeStr(TJSONValueType type) const
+{
+   static const string kJSONString("string");
+   static const string kJSONNumber("number");
+   static const string kJSONObject("object");
+   static const string kJSONArray("array");
+   static const string kJSONTrue("true");
+   static const string kJSONFalse("false");
+   static const string kJSONNull("null");
+   static const string kUNKNOWNJSONValue("unknown");
+   switch(type)
+   {
+   case kJSONStringType:
+      return kJSONString;
+   case kJSONNumberType:
+      return kJSONNumber;
+   case kJSONObjectType:
+      return kJSONObject;
+   case kJSONArrayType:
+      return kJSONArray;
+   case kJSONTrueType:
+      return kJSONTrue;
+   case kJSONFalseType:
+      return kJSONFalse;
+   case kJSONNullType:
+      return kJSONNull;
+   case kUNKNOWNJSONValueType:
+   default:
+      break;
+   }
+   return kUNKNOWNJSONValue;
 }
 
 size_t BoostJSON::GetChildCount(ptree::const_iterator& itr) const
 {
-//   const ptree& pt = (*itr).second;
    return (*itr).second.size();
 }
 

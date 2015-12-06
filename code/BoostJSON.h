@@ -43,16 +43,25 @@ using namespace std;
 namespace BoostJSONDemo
 {
 
-enum TValueType
+enum TJSONValueType
 {
-   kString,
-   kNumber,
+   kJSONStringType,
+   kJSONNumberType,
+   kJSONObjectType,
+   kJSONArrayType,
+   kJSONTrueType,
+   kJSONFalseType,
+   kJSONNullType,
+   kUNKNOWNJSONValueType,
+};
+
+enum TObjType
+{
    kObject,
-   kArray,
-   kTrue,
-   kFalse,
-   kNull,
-   kUNKNOWNValueType,
+   kArrayObj,
+   kValue,
+   kStrValuePair,
+   kUNKNOWNObjType,
 };
 
 class BoostJSON
@@ -62,6 +71,8 @@ public:
    virtual ~BoostJSON();
 
    void LoadJSONFile(const string& jsonFileName);
+   void CoutCode(ptree::const_iterator itr, string& outStr) const;
+   void CoutTypeStr(ptree::const_iterator itr) const;
    void Dump(const ptree& pt, int cnt) const;
    void Dump() const;
    const ptree& getPt() const;
@@ -70,7 +81,10 @@ public:
    bool IsString(ptree::const_iterator &itr) const;
    bool IsArray(ptree::const_iterator &itr) const;
    bool IsValue(ptree::const_iterator &itr) const;
-   TValueType GetValueType(ptree::const_iterator &itr) const;
+   TObjType GetObjectType(ptree::const_iterator &itr) const;
+   TJSONValueType GetValueType(ptree::const_iterator &itr) const;
+   TJSONValueType GetValueType(const string& valStr) const;
+   const string& GetValueTypeStr(TJSONValueType type) const;
    size_t GetChildCount(ptree::const_iterator &itr) const;
 
 private:

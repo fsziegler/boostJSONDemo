@@ -11,6 +11,7 @@
       "obj2string1":"obj2value1",
       "obj2string2":12,
       "obj2string3":{
+         "obj2str3EmptyObj1":{},
          "obj2str3string1":"obj2str3value1",
          "obj2str3string2":12
       }
