@@ -43,6 +43,7 @@ using namespace std;
 namespace BoostJSONDemo
 {
 
+// Definitions taken from http://www.json.org/
 enum TJSONValueType
 {
    kJSONStringType,
@@ -70,6 +71,7 @@ public:
    BoostJSON();
    virtual ~BoostJSON();
 
+   // LoadJSONFile() loads the file jsonFileName
    void LoadJSONFile(const string& jsonFileName);
    void CoutCode(ptree::const_iterator itr, string& outStr) const;
    void CoutTypeStr(ptree::const_iterator itr) const;

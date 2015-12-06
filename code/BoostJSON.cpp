@@ -36,17 +36,28 @@ namespace BoostJSONDemo
 
 BoostJSON::BoostJSON()
 {
-//   boost::property_tree::read_json("data.json", pt);
 }
 
 BoostJSON::~BoostJSON()
 {
-   // TODO Auto-generated destructor stub
 }
 
 void BoostJSON::LoadJSONFile(const string& jsonFileName)
 {
-   read_json(jsonFileName.c_str(), m_pt);
+   try
+   {
+      read_json(jsonFileName.c_str(), m_pt);
+   }
+   catch(exception& ex)
+   {
+      cout << "Exception " << ex.what() << " thrown trying to open JSON file "
+            << jsonFileName << endl;
+   }
+   catch(...)
+   {
+      cout << "Unknown exception thrown trying to open JSON file "
+            << jsonFileName << endl;
+   }
 }
 
 void Indent(int cnt)
