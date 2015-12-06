@@ -29,6 +29,7 @@
 
 # Eclipse workspace files
 workspace/.metadata
+workspace/RemoteSystemsTempFiles
 
 # Backup files
 *~

@@ -26,21 +26,75 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-// Description : Hello World in C++, Ansi-style
-//============================================================================
 
 #include "BoostJSON.h"
+#include "ZiegVersion.h"
+#include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 #include <iostream>
 #include <sstream>
 #include <map>
+
+namespace bpo = boost::program_options;
+namespace bfs = boost::filesystem;
+namespace zv = ZiegVersion;
 
 using namespace std;
 using namespace BoostJSONDemo;
 
 int main(int argc, char *argv[]) {
-   BoostJSON bjson;
-   bjson.LoadJSONFile(argv[1]);
-   bjson.Dump();
-//   cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+   try
+   {
+      bpo::options_description cmdline_options;
+      cmdline_options.add_options()
+         ("version,v", "print version string")
+         ("help,h", "produce help message")
+         ("json,j", bpo::value<string>(), "JSON input data file (required)")
+      ;
+      bpo::variables_map vm;
+      bpo::store(bpo::parse_command_line(argc, argv, cmdline_options), vm);
+      bpo::notify(vm);
+
+      if (vm.count("version"))
+      {
+         cout << "BoostJSONDemo (bjd) Program" << endl;
+         cout << "Version: " << zv::GetFullVersionString() << endl;
+         cout << "  Built: " << zv::BuildDate << "@" << zv::BuildTime << endl;
+         cout << "   UUID: " << zv::UUID << endl;
+         exit(0);
+      }
+      if (vm.count("help"))
+      {
+         cout << cmdline_options << endl;
+         exit(0);
+      }
+      if (vm.count("json"))
+      {
+         string inFileStr(vm["json"].as<string>());
+         if(!bfs::exists(inFileStr))
+         {
+            cout << "The input file " << inFileStr << " does not exist."
+                  << endl;
+            exit(1);
+         }
+         cout << "Loading file " << inFileStr << endl;
+         BoostJSON bjson;
+         bjson.LoadJSONFile(inFileStr);
+         bjson.Dump();
+      }
+      else
+      {
+         cout << "You must specify an input file with the '-d' option" << endl;
+         exit(2);
+      }
+   }
+   catch(exception& ex)
+   {
+
+   }
+   catch(...)
+   {
+
+   }
    return 0;
 }
