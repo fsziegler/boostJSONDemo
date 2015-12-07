@@ -43,9 +43,9 @@ using namespace std;
 using namespace BoostJSONDemo;
 
 int main(int argc, char *argv[]) {
+   bpo::options_description cmdline_options;
    try
    {
-      bpo::options_description cmdline_options;
       cmdline_options.add_options()
          ("version,v", "print version string")
          ("help,h", "produce help message")
@@ -90,11 +90,15 @@ int main(int argc, char *argv[]) {
    }
    catch(exception& ex)
    {
-
+      cout << "Exception: [" << ex.what() << "] thrown." << endl;
+      cout << cmdline_options << endl;
+      exit(3);
    }
    catch(...)
    {
-
+      cout << "Exception thrown." << endl;
+      cout << cmdline_options << endl;
+      exit(4);
    }
    return 0;
 }

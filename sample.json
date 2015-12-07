@@ -1,25 +1,25 @@
 {
    "object1":{
-      "obj1string1":"obj1value1",
-      "obj1string2":12,
-      "obj1string3":12.345,
-      "obj1string4":true,
-      "obj1string5":false,
-      "obj1string6":null
+      "obj1Str1":"obj1value1",
+      "obj1Str2":12,
+      "obj1Str3":12.345,
+      "obj1Str4":true,
+      "obj1Str5":false,
+      "obj1Str6":null
    },
    "object2":{
-      "obj2string1":"obj2value1",
-      "obj2string2":12,
-      "obj2string3":{
+      "obj2Str1":"obj2value1",
+      "obj2Str2":12,
+      "obj2Str3Object":{
          "obj2str3EmptyObj1":{},
-         "obj2str3string1":"obj2str3value1",
-         "obj2str3string2":12
+         "obj2str3Str1":"obj2str3value1",
+         "obj2str3Str2":12
       }
    },
    "object3":{
-      "obj3string1":"obj3str1value1",
-      "obj3string2":12,
-      "obj3array1":[
+      "obj3Str1":"obj3str1value1",
+      "obj3Str2":12,
+      "obj3Array1":[
          "obj3arr1string1",
          "obj3arr1string2",
          "obj3arr1string3",
@@ -28,6 +28,8 @@
          true,
          false,
          null
+      ],
+      "obj3EmptyArray1":[
       ]
    }
 }

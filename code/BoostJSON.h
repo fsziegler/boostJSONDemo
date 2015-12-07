@@ -44,6 +44,8 @@ namespace BoostJSONDemo
 {
 
 // Definitions taken from http://www.json.org/
+// TJSONValueType defines the value types allowed as an element in an array or
+// as the value portion of a string-value pair in an object.
 enum TJSONValueType
 {
    kJSONStringType,
@@ -56,10 +58,11 @@ enum TJSONValueType
    kUNKNOWNJSONValueType,
 };
 
+// TObjType defines the fundamental entities used by JSON.
 enum TObjType
 {
    kObject,
-   kArrayObj,
+   kArray,
    kValue,
    kStrValuePair,
    kUNKNOWNObjType,
@@ -73,20 +76,42 @@ public:
 
    // LoadJSONFile() loads the file jsonFileName
    void LoadJSONFile(const string& jsonFileName);
+   // CoutCode() outputs a three letter code that shows if itr->first,
+   // itr->second.data, and itr->second, respectively, are populated ('S') or
+   // empty('E').
    void CoutCode(ptree::const_iterator itr, string& outStr) const;
+   // CoutTypeStr() outputs the type of itr.
    void CoutTypeStr(ptree::const_iterator itr) const;
+   // Dump() outputs the JSON structure under pt, indented by cnt.
    void Dump(const ptree& pt, int cnt) const;
+   // Dump() outputs the entire loaded JSON structure.
    void Dump() const;
+   // getPt() returns the internal ptree.
    const ptree& getPt() const;
 
+   // IsObject() returns true iff itr points to an object.
+   // An object has a name, an unnamed tree, and the first child element is an
+   // object or string-value pair.
    bool IsObject(ptree::const_iterator &itr) const;
-   bool IsString(ptree::const_iterator &itr) const;
+   // IsArray() returns true iff itr points to an element in an array.
+   // An array has a name, an unnamed tree, and the first child element is a
+   // value.
    bool IsArray(ptree::const_iterator &itr) const;
+   // IsValue() returns true iff itr points to a value.
+   // A value has no name and a named, empty tree.
    bool IsValue(ptree::const_iterator &itr) const;
+   // IsStrValuePair() returns true iff itr points to a string-value pair.
+   // A string-value pair has a name and a named, empty tree.
+   bool IsStrValuePair(ptree::const_iterator &itr) const;
+   // GetObjectType() returns the object type of itr.
    TObjType GetObjectType(ptree::const_iterator &itr) const;
+   // GetValueType() returns the value type of itr.
    TJSONValueType GetValueType(ptree::const_iterator &itr) const;
+   // GetValueType() returns the value type of valStr.
    TJSONValueType GetValueType(const string& valStr) const;
+   // GetValueTypeStr() returns the string name for type.
    const string& GetValueTypeStr(TJSONValueType type) const;
+   // GetChildCount() returns the number of direct children under itr.
    size_t GetChildCount(ptree::const_iterator &itr) const;
 
 private:

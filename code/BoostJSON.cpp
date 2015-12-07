@@ -84,7 +84,7 @@ void BoostJSON::CoutTypeStr(ptree::const_iterator itr) const
    case kObject:
       cout << "{object} ";
       break;
-   case kArrayObj:
+   case kArray:
       cout << "{array object} ";
       break;
    case kValue:
@@ -93,7 +93,9 @@ void BoostJSON::CoutTypeStr(ptree::const_iterator itr) const
       cout << "} ";
       break;
    case kStrValuePair:
-      cout << "{string-value pair} ";
+      cout << "{";
+      cout << GetValueTypeStr(GetValueType(itrCpy->second.data()));
+      cout << "} ";
       break;
    case kUNKNOWNObjType:
    default:
@@ -113,7 +115,7 @@ void BoostJSON::Dump(const ptree& pt, int cnt) const
       if(0 < itr->first.size())
       {
          cout << outStr << itr->first;
-         CoutTypeStr(itr);
+         cout << (kObject == GetObjectType(itr) ? "{object}" : "{string}");
       }
       else
       {
@@ -156,14 +158,14 @@ bool BoostJSON::IsArray(ptree::const_iterator& itr) const
    return (kJSONArrayType == GetValueType(itr));
 }
 
-bool BoostJSON::IsString(ptree::const_iterator& itr) const
-{
-   return (kJSONStringType == GetValueType(itr));
-}
-
 bool BoostJSON::IsValue(ptree::const_iterator& itr) const
 {
    return (kValue == GetObjectType(itr));
+}
+
+bool BoostJSON::IsStrValuePair(ptree::const_iterator &itr) const
+{
+   return (kStrValuePair == GetObjectType(itr));
 }
 
 /*
@@ -182,15 +184,15 @@ bool BoostJSON::IsValue(ptree::const_iterator& itr) const
 TObjType BoostJSON::GetObjectType(ptree::const_iterator &itr) const
 {
    bool first(0 < itr->first.size());
-   bool twoData(0 < itr->second.data().size());
+   bool childName(0 < itr->second.data().size());
    bool children(0 < itr->second.size());
-   if(!first && twoData && !children)
+   if(!first && childName && !children)
    {
       return kValue;
    }
-   if (first && !twoData)
+   if (first && !childName)
    {
-      if(0 < itr->second.size())
+      if(children)
       {
          ptree::const_iterator objItr(itr->second.begin());
          switch(GetObjectType(objItr))
@@ -199,14 +201,17 @@ TObjType BoostJSON::GetObjectType(ptree::const_iterator &itr) const
          case kStrValuePair:
             return kObject;
          case kValue:
-            return kArrayObj;
+            return kArray;
          default:
             break;
          }
       }
-      return kUNKNOWNObjType;
+      else
+      {
+         return kObject;
+      }
    }
-   if(first && twoData && !children)
+   if(first && childName && !children)
    {
      return kStrValuePair;
    }
@@ -253,7 +258,7 @@ TJSONValueType BoostJSON::GetValueType(ptree::const_iterator& itr) const
    {
    case kObject:
       return kJSONObjectType;
-   case kArrayObj:
+   case kArray:
       return kJSONArrayType;
    case kValue:
    {
