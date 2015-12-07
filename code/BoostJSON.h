@@ -33,7 +33,9 @@ SOFTWARE.
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <map>
 #include <string>
+#include <boost/regex.hpp>
 
 using boost::property_tree::ptree;
 using boost::property_tree::read_json;
@@ -48,16 +50,20 @@ namespace BoostJSONDemo
 // as the value portion of a string-value pair in an object.
 enum TJSONValueType
 {
-   kJSONStringType,
-   kJSONNumberType,
-   kJSONObjectType,
-   kJSONArrayType,
    kJSONTrueType,
    kJSONFalseType,
    kJSONNullType,
+   kJSONNumberType,
+   kJSONStringType,
+   kJSONObjectType,
+   kJSONArrayType,
    kUNKNOWNJSONValueType,
 };
 
+typedef pair<TJSONValueType, string> TTJSONValueTypeStrPair;
+typedef map<TJSONValueType, string> TTJSONValueTypeStrMap;
+typedef pair<TJSONValueType, boost::regex> TTJSONValueTypeRegexPair;
+typedef map<TJSONValueType, boost::regex> TTJSONValueTypeRegexMap;
 // TObjType defines the fundamental entities used by JSON.
 enum TObjType
 {
@@ -68,17 +74,21 @@ enum TObjType
    kUNKNOWNObjType,
 };
 
+typedef pair<TObjType, string> TTObjTypeStrPair;
+typedef map<TObjType, string> TTObjTypeStrMap;
+
 class BoostJSON
 {
 public:
    BoostJSON();
    virtual ~BoostJSON();
 
+   // INPUT/OUPUT
    // LoadJSONFile() loads the file jsonFileName
    void LoadJSONFile(const string& jsonFileName);
-   // CoutCode() outputs a three letter code that shows if itr->first,
-   // itr->second.data, and itr->second, respectively, are populated ('S') or
-   // empty('E').
+   // CoutCode() populates outStr with a three letter code that shows if
+   // itr->first, itr->second.data, and itr->second, respectively, are
+   // populated ('S') or empty('E').
    void CoutCode(ptree::const_iterator itr, string& outStr) const;
    // CoutTypeStr() outputs the type of itr.
    void CoutTypeStr(ptree::const_iterator itr) const;
@@ -86,9 +96,20 @@ public:
    void Dump(const ptree& pt, int cnt) const;
    // Dump() outputs the entire loaded JSON structure.
    void Dump() const;
-   // getPt() returns the internal ptree.
+   // getPt() returns the internal Boost ptree.
    const ptree& getPt() const;
 
+   // INFORMATIONAL
+   // GetObjectType() returns the object type of itr.
+   TObjType GetObjectType(ptree::const_iterator &itr) const;
+   // GetValueType() returns the value type of itr.
+   TJSONValueType GetValueType(ptree::const_iterator &itr) const;
+   // GetValueType() returns the value type of valStr.
+   TJSONValueType GetValueType(const string& valStr) const;
+   // GetValueTypeStr() returns the string name for type.
+   const string& GetValueTypeStr(TJSONValueType type) const;
+   // GetChildCount() returns the number of direct children under itr.
+   size_t GetChildCount(ptree::const_iterator &itr) const;
    // IsObject() returns true iff itr points to an object.
    // An object has a name, an unnamed tree, and the first child element is an
    // object or string-value pair.
@@ -103,19 +124,18 @@ public:
    // IsStrValuePair() returns true iff itr points to a string-value pair.
    // A string-value pair has a name and a named, empty tree.
    bool IsStrValuePair(ptree::const_iterator &itr) const;
-   // GetObjectType() returns the object type of itr.
-   TObjType GetObjectType(ptree::const_iterator &itr) const;
-   // GetValueType() returns the value type of itr.
-   TJSONValueType GetValueType(ptree::const_iterator &itr) const;
-   // GetValueType() returns the value type of valStr.
-   TJSONValueType GetValueType(const string& valStr) const;
-   // GetValueTypeStr() returns the string name for type.
-   const string& GetValueTypeStr(TJSONValueType type) const;
-   // GetChildCount() returns the number of direct children under itr.
-   size_t GetChildCount(ptree::const_iterator &itr) const;
 
 private:
+   // Not implemented
+   BoostJSON(BoostJSON&);
+   BoostJSON& operator=(BoostJSON&);
+   bool operator==(BoostJSON&);
+   bool operator!=(BoostJSON&);
+
    ptree m_pt;
+   static TTJSONValueTypeStrMap  ms_valTypeStrMap;
+   static TTJSONValueTypeRegexMap  ms_valTypeRegexStrMap;
+   static TTObjTypeStrMap        ms_objTypeStrMap;
 };
 
 }

@@ -29,13 +29,54 @@ SOFTWARE.
  */
 
 #include "BoostJSON.h"
-#include <boost/regex.hpp>
 
 namespace BoostJSONDemo
 {
 
+TTJSONValueTypeStrMap   BoostJSON::ms_valTypeStrMap;
+const string            kUNKNOWNJSONValueTypeStr("UNKNOWNValueType");
+TTJSONValueTypeRegexMap BoostJSON::ms_valTypeRegexStrMap;
+TTObjTypeStrMap         BoostJSON::ms_objTypeStrMap;
+const string            kUNKNOWNJSONObjTypeStr("UNKNOWNObjType");
+
 BoostJSON::BoostJSON()
 {
+   if (0 == ms_valTypeStrMap.size())
+   {
+      ms_valTypeStrMap.insert(TTJSONValueTypeStrPair(kJSONTrueType, "true"));
+      ms_valTypeStrMap.insert(TTJSONValueTypeStrPair(kJSONFalseType, "false"));
+      ms_valTypeStrMap.insert(TTJSONValueTypeStrPair(kJSONNullType, "null"));
+      ms_valTypeStrMap.insert(
+            TTJSONValueTypeStrPair(kJSONNumberType, "number"));
+      ms_valTypeStrMap.insert(
+            TTJSONValueTypeStrPair(kJSONStringType, "string"));
+      ms_valTypeStrMap.insert(
+            TTJSONValueTypeStrPair(kJSONObjectType, "object"));
+      ms_valTypeStrMap.insert(TTJSONValueTypeStrPair(kJSONArrayType, "array"));
+      ms_valTypeStrMap.insert(
+            TTJSONValueTypeStrPair(kUNKNOWNJSONValueType,
+                  kUNKNOWNJSONValueTypeStr));
+
+      ms_valTypeRegexStrMap.insert(
+            TTJSONValueTypeRegexPair(kJSONTrueType, boost::regex("true")));
+      ms_valTypeRegexStrMap.insert(
+            TTJSONValueTypeRegexPair(kJSONFalseType, boost::regex("false")));
+      ms_valTypeRegexStrMap.insert(
+            TTJSONValueTypeRegexPair(kJSONNullType, boost::regex("null")));
+      ms_valTypeRegexStrMap.insert(
+            TTJSONValueTypeRegexPair(kJSONNumberType,
+                  boost::regex("[0-9\\+\\-\\.eE]+")));
+      ms_valTypeRegexStrMap.insert(
+            TTJSONValueTypeRegexPair(kJSONStringType,
+                  boost::regex("[[:alnum:][:punct:][:space:]]+")));
+
+      ms_objTypeStrMap.insert(TTObjTypeStrPair(kObject, "Object"));
+      ms_objTypeStrMap.insert(TTObjTypeStrPair(kArray, "Array"));
+      ms_objTypeStrMap.insert(TTObjTypeStrPair(kValue, "Value"));
+      ms_objTypeStrMap.insert(TTObjTypeStrPair(kStrValuePair, "ValuePair"));
+      ms_objTypeStrMap.insert(
+            TTObjTypeStrPair(kUNKNOWNObjType, kUNKNOWNJSONObjTypeStr));
+   }
 }
 
 BoostJSON::~BoostJSON()
@@ -159,36 +200,16 @@ const ptree& BoostJSON::getPt() const
    return m_pt;
 }
 
-bool BoostJSON::IsObject(ptree::const_iterator& itr) const
-{
-   return (kJSONObjectType == GetValueType(itr));
-}
-
-bool BoostJSON::IsArray(ptree::const_iterator& itr) const
-{
-   return (kJSONArrayType == GetValueType(itr));
-}
-
-bool BoostJSON::IsValue(ptree::const_iterator& itr) const
-{
-   return (kValue == GetObjectType(itr));
-}
-
-bool BoostJSON::IsStrValuePair(ptree::const_iterator &itr) const
-{
-   return (kStrValuePair == GetObjectType(itr));
-}
-
 /*
             Second
    First    data()   Children Case
    -------+--------+--------+-------
    empty  | empty  | empty  | DNE
    empty  | empty  | exist  | DNE
-*   empty  | string | empty  | value (in array)
+   empty  | string | empty  | value (in array)
    empty  | string | exist  | DNE
-*   string | empty  | empty  | object (empty)
-*   string | empty  | exist  | object
+   string | empty  | empty  | object (empty)
+   string | empty  | exist  | object
    string | string | empty  | string:value pair
    string | string | exist  | DNE
 */
@@ -229,35 +250,18 @@ TObjType BoostJSON::GetObjectType(ptree::const_iterator &itr) const
    return kUNKNOWNObjType;
 }
 
-const boost::regex kTrueTypeRegexStr("true");
-const boost::regex kFalseTypeRegexStr("false");
-const boost::regex kNullTypeRegexStr("null");
-const boost::regex kNumberTypeRegexStr("[0-9\\+\\-\\.eE]+");
-// see http://www.regular-expressions.info/posixbrackets.html
-const boost::regex kStringTypeRegexStr(
-      "[[:alnum:][:punct:][:space:]]+");
-
 TJSONValueType BoostJSON::GetValueType(const string& valStr) const
 {
-   if(boost::regex_match(valStr, kTrueTypeRegexStr))
+   for (int i = kJSONTrueType; kJSONObjectType != i;
+         ++i)
    {
-      return kJSONTrueType;
-   }
-   if(boost::regex_match(valStr, kFalseTypeRegexStr))
-   {
-      return kJSONFalseType;
-   }
-   if(boost::regex_match(valStr, kNullTypeRegexStr))
-   {
-      return kJSONNullType;
-   }
-   if(boost::regex_match(valStr, kNumberTypeRegexStr))
-   {
-      return kJSONNumberType;
-   }
-   if(boost::regex_match(valStr, kStringTypeRegexStr))
-   {
-      return kJSONStringType;
+      const TJSONValueType valType((TJSONValueType) i);
+      auto itr = ms_valTypeRegexStrMap.find(valType);
+      if ((ms_valTypeRegexStrMap.end() != itr)
+            && (boost::regex_match(valStr, (*itr).second)))
+      {
+         return valType;
+      }
    }
    return kUNKNOWNJSONValueType;
 }
@@ -285,40 +289,36 @@ TJSONValueType BoostJSON::GetValueType(ptree::const_iterator& itr) const
 
 const string& BoostJSON::GetValueTypeStr(TJSONValueType type) const
 {
-   static const string kJSONString("string");
-   static const string kJSONNumber("number");
-   static const string kJSONObject("object");
-   static const string kJSONArray("array");
-   static const string kJSONTrue("true");
-   static const string kJSONFalse("false");
-   static const string kJSONNull("null");
-   static const string kUNKNOWNJSONValue("unknown");
-   switch(type)
+   if(ms_valTypeStrMap.end() != ms_valTypeStrMap.find(type))
    {
-   case kJSONStringType:
-      return kJSONString;
-   case kJSONNumberType:
-      return kJSONNumber;
-   case kJSONObjectType:
-      return kJSONObject;
-   case kJSONArrayType:
-      return kJSONArray;
-   case kJSONTrueType:
-      return kJSONTrue;
-   case kJSONFalseType:
-      return kJSONFalse;
-   case kJSONNullType:
-      return kJSONNull;
-   case kUNKNOWNJSONValueType:
-   default:
-      break;
+      return (*ms_valTypeStrMap.find(type)).second;
    }
-   return kUNKNOWNJSONValue;
+   return kUNKNOWNJSONValueTypeStr;
 }
 
 size_t BoostJSON::GetChildCount(ptree::const_iterator& itr) const
 {
    return (*itr).second.size();
+}
+
+bool BoostJSON::IsObject(ptree::const_iterator& itr) const
+{
+   return (kJSONObjectType == GetValueType(itr));
+}
+
+bool BoostJSON::IsArray(ptree::const_iterator& itr) const
+{
+   return (kJSONArrayType == GetValueType(itr));
+}
+
+bool BoostJSON::IsValue(ptree::const_iterator& itr) const
+{
+   return (kValue == GetObjectType(itr));
+}
+
+bool BoostJSON::IsStrValuePair(ptree::const_iterator &itr) const
+{
+   return (kStrValuePair == GetObjectType(itr));
 }
 
 }
