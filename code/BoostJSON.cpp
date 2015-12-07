@@ -115,7 +115,18 @@ void BoostJSON::Dump(const ptree& pt, int cnt) const
       if(0 < itr->first.size())
       {
          cout << outStr << itr->first;
-         cout << (kObject == GetObjectType(itr) ? "{object}" : "{string}");
+         switch(GetObjectType(itr))
+         {
+         case kObject:
+            cout << "{object}";
+            break;
+         case kArray:
+            cout << "{array}";
+            break;
+         default:
+            cout << "{string}";
+            break;
+         }
       }
       else
       {
