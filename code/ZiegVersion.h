@@ -60,11 +60,11 @@ namespace ZiegVersion
 
 // These are updated automatically with each build
 
-   const long int BuildNumber = 144;
-   const long int UTCSeconds = 1449459980;   // Updated with date +%s
-   const string BuildDate = "2015-12-06";    // Updated with date +%F
-   const string BuildTime = "19:46:20";      // Updated with date +%T
-   const string UUID = "14406186-9c95-11e5-af10-afa66d4fbbcc"; // Updated with uuid
+   const long int BuildNumber = 145;
+   const long int UTCSeconds = 1452962251;   // Updated with date +%s
+   const string BuildDate = "2016-01-16";    // Updated with date +%F
+   const string BuildTime = "08:37:31";      // Updated with date +%T
+   const string UUID = "6ff8d810-bc6f-11e5-93ca-080027eec653"; // Updated with uuid
    
    string GetFullVersionString() {
       stringstream fullVersion;

@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
       }
       else
       {
-         cout << "You must specify an input file with the '-d' option" << endl;
+         cout << "You must specify an input file with the '-j' option" << endl;
          exit(2);
       }
    }
